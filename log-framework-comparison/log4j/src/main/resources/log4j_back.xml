@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <appender name="myConsole" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %t %c{1}:%L - %m%n" />
+        </layout>
+
+        <!--过滤器设置输出的级别 -->
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="debug" />
+            <param name="levelMax" value="warn" />
+            <param name="AcceptOnMatch" value="true" />
+        </filter>
+    </appender>
+
+    <appender name="myFile" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="D:/test/log4jBenchMark.log" />
+        <param name="Append" value="true" />
+        <param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %t %c{1}:%L - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="async_file" class="org.apache.log4j.AsyncAppender">
+        <param name="BufferSize" value="8192" />
+        <appender-ref ref="myFile" />
+    </appender>
+
+    <logger name="com.weifuchow.log.comparsion" additivity="false">
+        <level value="info" />
+<!--        <appender-ref ref="myConsole" /> &lt;!&ndash; 同步:FILE 异步:async_file &ndash;&gt;-->
+        <appender-ref ref="async_file" /> <!-- 同步:FILE 异步:async_file -->
+    </logger>
+
+</log4j:configuration>

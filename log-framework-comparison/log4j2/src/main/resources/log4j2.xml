@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--设置log4j2的自身log级别为warn -->
+<configuration status="warn">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5p %t %c{1}:%L - %m%n</Property>
+        <Property name="LOG_HOME">D:/logs</Property>
+        <Property name="LOG_APP">log4j</Property>
+        <Property name="LOG_LEVEL">${sys:level:-info}</Property>
+    </Properties>
+
+    <appenders>
+        <ScriptAppenderSelector name="ConsoleOrFile">
+            <Script language="groovy"><![CDATA[
+                if (System.getProperty("isProd", 'false').equalsIgnoreCase('true')) {
+                    return "File"
+                } else {
+                    return "Console"
+                }
+            ]]></Script>
+            <AppenderSet>
+
+                <Console name="Console" target="SYSTEM_OUT">
+                    <PatternLayout pattern="${LOG_PATTERN}"/>
+                </Console>
+
+                <RollingRandomAccessFile name="File" fileName="${LOG_HOME}/${LOG_APP}.log"
+                                         filePattern="${LOG_HOME}/${LOG_APP}/${LOG_APP}-%d{yyyy-MM-dd}.log.gz"
+                                         immediateFlush="true" append="true">
+                    <PatternLayout>
+                        <Pattern>${LOG_PATTERN}</Pattern>
+                    </PatternLayout>
+                    <Policies>
+                        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                    </Policies>
+                    <DefaultRolloverStrategy>
+                        <Delete basePath="${LOG_HOME}/${LOG_APP}" maxDepth="2">
+                            <IfFileName glob="${LOG_APP}-*.log.gz"/>
+                            <IfLastModified age="7d"/>
+                        </Delete>
+                    </DefaultRolloverStrategy>
+                </RollingRandomAccessFile>
+            </AppenderSet>
+        </ScriptAppenderSelector>
+
+        <ScriptAppenderSelector name="StatisticOrNULL">
+            <Script language="groovy"><![CDATA[
+                if (System.getProperty("isProd", 'false').equalsIgnoreCase('true')) {
+                    return "Statistic"
+                } else {
+                    return "Null"
+                }
+            ]]></Script>
+            <AppenderSet>
+
+                <Null name="Null" />
+
+                <RollingRandomAccessFile name="Statistic" fileName="${LOG_HOME}/statistic/${LOG_APP}.log"
+                                         filePattern="${LOG_HOME}/${LOG_APP}/${LOG_APP}-%d{yyyy-MM-dd}.log.gz"
+                                         immediateFlush="true" append="true">
+
+<!--                    <HTMLLayout charset="UTF-8" title="Howtodoinjava Info Logs" locationInfo="true" />-->
+                    <PatternLayout>
+                        <Pattern>%m%n</Pattern>
+                    </PatternLayout>
+                    <Policies>
+                        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                    </Policies>
+                    <DefaultRolloverStrategy>
+                        <Delete basePath="${LOG_HOME}/statistic/${LOG_APP}" maxDepth="2">
+                            <IfFileName glob="${LOG_APP}-*.log.gz"/>
+                            <IfLastModified age="7d"/>
+                        </Delete>
+                    </DefaultRolloverStrategy>
+                </RollingRandomAccessFile>
+            </AppenderSet>
+        </ScriptAppenderSelector>
+
+
+    </appenders>
+
+    <loggers>
+
+        <Logger name="com.weifuchow.log.comparsion.log4j2.JsonOutPutTest" level="info" additivity="false" >
+            <AppenderRef ref="StatisticOrNULL"/>
+        </Logger>
+
+        <Root level="${LOG_LEVEL}" includeLocation="true">
+            <AppenderRef ref="ConsoleOrFile"/>
+        </Root>
+    </loggers>
+
+</configuration>

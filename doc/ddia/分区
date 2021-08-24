@@ -1,0 +1,28 @@
+# 分区
+
+- 仅仅进行复制是不够的：我们需要将数据进行**分区（partitions）**，也称为**分片（sharding）**[i](https://vonng.gitbooks.io/ddia-cn/content/ch6.html#fn_i)
+
+  > i. 正如本章所讨论的，分区是一种有意将大型数据库分解成小型数据库的方式。它与**网络分区（net splits）**无关，这是节点之间网络中的一种故障类型。我们将在[第8章](https://vonng.gitbooks.io/ddia-cn/content/ch8.html)讨论这些错误。[ ↩](https://vonng.gitbooks.io/ddia-cn/content/ch6.html#reffn_i)
+
+  > ##### 术语澄清
+  >
+  >  上文中的**分区(partition)**,在MongoDB,Elasticsearch和Solr Cloud中被称为**分片(shard)**,在HBase中称之为**区域(Region)**，Bigtable中则是 **表块（tablet）**，Cassandra和Riak中是**虚节点（vnode)**, Couchbase中叫做**虚桶(vBucket)**.但是**分区(partition)** 是约定俗成的叫法。
+
+- 每个分区都是一部分数据，相当于一个数据库。
+
+## 一般数据库存储架构
+
+- ![img](https://vonng.gitbooks.io/ddia-cn/content/img/fig6-1.png)
+
+## 分区的意义
+
+- 分区的意义在于，将庞大的数据散落在机器集群上，使其能够达到N倍于单台机器的吞吐量。
+-  分区目标是将数据和查询负载均匀分布在各个节点上。如果每个节点公平分享数据和负载，那么理论上10个节点应该能够处理10倍的数据量和10倍的单个节点的读写吞吐量（暂时忽略复制）。
+- 目的充分使用集群负载能力。
+
+## 分区的带来的问题
+
+- 如何分区，防止偏斜
+- 如何查询
+- 
+

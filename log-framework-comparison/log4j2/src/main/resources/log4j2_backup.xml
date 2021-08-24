@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--设置log4j2的自身log级别为warn -->
+<configuration status="warn">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5p %t %c{1}:%L - %m%n</Property>
+        <Property name="LOG_HOME">D:/logs</Property>
+        <Property name="LOG_APP">log4j</Property>
+    </Properties>
+
+    <Scripts>
+        <Script name="isProd" language="groovy"><![CDATA[
+           return System.getProperty("isProd", 'false').equalsIgnoreCase('true');
+        ]]>
+        </Script>
+    </Scripts>
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+<!--        <console name="Console" target="SYSTEM_OUT">-->
+<!--            <PatternLayout pattern="${LOG_PATTERN}"/>-->
+<!--        </console>-->
+
+
+        <RollingRandomAccessFile name="RandomAccessFile" fileName="${LOG_HOME}/${LOG_APP}.log"
+                                 filePattern="${LOG_HOME}/${LOG_APP}/${LOG_APP}-%d{yyyy-MM-dd-HH-mm}.log.gz"
+                                 immediateFlush="false" append="true">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_HOME}/${LOG_APP}" maxDepth="2">
+                    <IfFileName glob="${LOG_APP}-*.log.gz"/>
+                    <IfLastModified age="1m"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+    </appenders>
+
+    <loggers>
+
+
+<!--        <AsyncLogger name="asynLogger" level="info"-->
+<!--                     includeLocation="true">-->
+<!--                <AppenderRef ref="RandomAccessFile"/>-->
+<!--        </AsyncLogger>-->
+
+        <Root level="info" includeLocation="true">
+<!--            &lt;!&ndash; 线上环境不使用console &ndash;&gt;-->
+            <AppenderRef ref="Console">
+                <ScriptFilter onMatch="DENY" onMisMatch="ACCEPT">
+                    <ScriptRef ref="isProd"/>
+                </ScriptFilter>
+            </AppenderRef>
+<!--            &lt;!&ndash; 线上环境只处理文件写入 &ndash;&gt;-->
+            <AppenderRef ref="RandomAccessFile">
+                <ScriptFilter onMatch="ACCEPT" onMisMatch="DENY">
+                    <ScriptRef ref="isProd"/>
+                </ScriptFilter>
+            </AppenderRef>
+
+<!--            <AppenderRef ref="RandomAccessFile"/>-->
+        </Root>
+    </loggers>
+
+</configuration>
