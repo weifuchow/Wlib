@@ -2,11 +2,25 @@
 
 ## netty 原理
 
+- reactor 模式
+
+## netty 内存管理
+
+https://www.cnblogs.com/lighten/p/8990509.html
+
+- 堆外内核缓冲区
+
+- 堆外内存ByteBuf
+- 池化内存ByteBuf
+  - 为了避免线程安全问题。每一个线程的threadlocal中存储了对象。并非唯一
 
 
-## 设计架构
 
+### [Where is the memory of direct buffer allocated by netty, kernel space or user space?](https://stackoverflow.com/questions/49174987/where-is-the-memory-of-direct-buffer-allocated-by-netty-kernel-space-or-user-sp)
 
+- 堆外内存也是在User space
+- 堆外内存核心原因
+  - 所有系统调用（例如读写套接字和文件）仅使用**本机内存**。他们不能使用堆。这意味着虽然您可以从堆复制到本机内存/从本机内存复制，但避免这种复制可以提高效率。
 
 
 

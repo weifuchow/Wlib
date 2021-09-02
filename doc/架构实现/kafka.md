@@ -52,7 +52,7 @@
     - ![img](image/20180110112302761)
     - ![img](image/20180110112329881)
 
-## Kafka 架构
+## Kafka 
 
 
 
@@ -68,9 +68,82 @@
 
 ## Q&A
 
+- kafka 消息保证
+  - ack 设置
+  - kafka的语义非常直接，当发送消息的时候，我们有一个消息被"提交"到日志中的概念，一旦一个发送的消息被提交，只要消息写入的分区有一个broker存活，消息就不会丢失。
+  - 生产者支持使用类事务语义向多个topic分区发送消息的能力：**要么所有消息成功写入所有分区，要么不写入任何分区**。这个特性的主要使用场景就是为了kafka topic的"恰好一次"处理。
+
+- 0.Why kafka so faster
+
+  - **Kafka 速度的秘诀在于，它把所有的消息都变成一个批量的文件，并且进行合理的批量压缩，减少网络 IO 损耗，通过 mmap 提高 I/O 速度，写入数据的时候由于单个 Partion 是末尾添加所以速度最优；读取数据的时候配合 sendfile 直接暴力输出。**
+
+  - **顺序写IO + MMAP** (文件)。批量Flush（利用mmap,充分使用pagecache 刷新磁盘。同时避免GC回收扫描，Random AccessFile）
+
+    - 中途挂了。没有flush到怎么办
+      - 日志提供了一个配置参数*M*，它控制在强制刷新到磁盘之前写入的最大消息数。
+    - flush到一半挂了怎么办
+      - 在启动时，运行日志恢复过程，迭代最新日志段中的所有消息并验证每个消息条目是否有效。
+      - 如果消息条目的大小和偏移量之和小于文件的长度并且消息有效负载的 CRC32 与与消息一起存储的 CRC 匹配，则消息条目是有效的。如果检测到损坏，日志将被截断到最后一个有效偏移量。但在写入包含该数据的块之前发生崩溃。CRC 检测到这种极端情况，并防止它破坏日志（尽管未写入的消息当然会丢失）。
+    - ![image](image/DFF98763013D48B58CCCE9C0A6A27F04)
+
+  - 批量写入
+
+    - 减少数据网络传输次数。
+    - 数据缓存区
+
+  - 数据压缩
+
+    - 以更小的传输字节。存储更多的数据（哈夫曼树）
+
+  - 高效传输
+
+    - 通过定义日志文件及偏移量的位置（稀疏索引（index)，段文件内容二分确定传输内容）
+
+    - ```java
+      // transfer to 
+      // inputstream   为文件FileChannel
+      // outputstream  为其他流
+      // 从FileChannel 直接写入到Nic Buffer 缓冲区
+      public abstract long transferTo(long position, long count,
+         WritableByteChannel target) throws IOException;
+      // 从src Channel 写入到 FileChannel当中
+      public abstract long transferFrom(ReadableByteChannel src,
+            long position, long count) throws IOException;
+      //
+      public static void copyFile( File from, File to ) throws IOException {
+         	URL website = new URL("http://www.website.com/information.asp");
+          ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+          FileOutputStream fos = new FileOutputStream("information.html");
+          fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+      } 
+      
+      private static void doCopyNIO(String inFile, String outFile) {
+          FileInputStream fis = null;
+          FileOutputStream fos = null;
+          FileChannel cis = null;
+          FileChannel cos = null;
+      
+          long len = 0, pos = 0;
+      
+          try {
+              fis = new FileInputStream(inFile);
+              cis = fis.getChannel();
+              fos = new FileOutputStream(outFile);
+              cos = fos.getChannel();
+              len = cis.size();
+              /*while (pos < len) {
+                      pos += cis.transferTo(pos, (1024 * 1024 * 10), cos);    // 10M
+                  }*/
+              cis.transferTo(0, len, cos);
+              fos.flush();
+          } catch (Exception e) {
+              e.printStackTrace();
+          } 
+      }
+
 - **1.kafka怎么将数据推送给客户端**
 
-  - 一种可能。kafka 将推送到客户端本地的Queue. 有数据push 进去。客户端监听线程，轮询读任务。有数据触发监听方法。
+  - kafka 通过offset
 
   - pull vs push
 
