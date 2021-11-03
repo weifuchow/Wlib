@@ -22,6 +22,7 @@
         <module>jar-depence</module>
         <module>disruptor-vs-blockingqueue</module>
         <module>algorithm</module>
+        <module>network</module>
     </modules>
 
 
