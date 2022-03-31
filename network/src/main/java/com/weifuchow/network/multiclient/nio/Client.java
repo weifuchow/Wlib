@@ -14,12 +14,12 @@ import java.nio.charset.StandardCharsets;
 
 public class Client {
 
-    private String id ;
+    private String id;
     private String name;
     private SocketChannel socketChannel;
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
-    public Client(String id,String name){
+    public Client(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -29,21 +29,37 @@ public class Client {
         this.socketChannel = SocketChannel.open();
         this.socketChannel.configureBlocking(false);
         this.socketChannel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ);
-        this.socketChannel.connect(new InetSocketAddress(host,port));
+        this.socketChannel.connect(new InetSocketAddress(host, port));
     }
 
-    public void sendData(String msg){
+    public void sendData(String msg) {
         try {
-            msg += "  : " +this.name;
+            msg += "  : " + this.name;
             int length = msg.getBytes(StandardCharsets.UTF_8).length;
+
             ByteBuffer buffer = ByteBuffer.allocate(4 + length);
             buffer.putInt(length);
             buffer.put(msg.getBytes(StandardCharsets.UTF_8));
             buffer.flip();
-            this.socketChannel.write(buffer);
+
+
+            for (int i = 0; i < (4 + length)/4; i++) {
+                ByteBuffer bu = ByteBuffer.allocate(4);
+                bu.put(buffer.get());
+                bu.put(buffer.get());
+                bu.put(buffer.get());
+                bu.put(buffer.get());
+                bu.flip();
+                logger.info(">>->> send  {} byte to server total bytes {} <<-<<", 4*(i + 1), 4 + length);
+                Thread.sleep(1000);
+                this.socketChannel.write(bu);
+
+            }
+
+//            this.socketChannel.write(buffer);
             logger.info("{} {} send finish", this.id, this.name);
-        }catch (Exception e){
-            logger.error("client send data error",e);
+        } catch (Exception e) {
+            logger.error("client send data error", e);
         }
     }
 

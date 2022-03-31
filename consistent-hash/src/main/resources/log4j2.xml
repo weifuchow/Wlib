@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--设置log4j2的自身log级别为warn -->
+<configuration status="warn">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5p %t %c{1}:%L - %m%n</Property>
+        <Property name="LOG_HOME">D:/logs</Property>
+        <Property name="LOG_APP">log4j</Property>
+        <Property name="LOG_LEVEL">${sys:level:-info}</Property>
+    </Properties>
+
+    <appenders>
+
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+
+    </appenders>
+
+    <loggers>
+
+        <Root level="${LOG_LEVEL}" includeLocation="true">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </loggers>
+
+</configuration>

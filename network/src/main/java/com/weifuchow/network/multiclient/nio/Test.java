@@ -29,7 +29,7 @@ public class Test {
         //
         createServer(port);
         //
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1; i++) {
             createClient(host, port, sel);
         }
         //
@@ -41,12 +41,15 @@ public class Test {
             }
         },"client pool").start();
         //
-        Thread.sleep(5000);
-        server.sendData("hello world!");
+        Thread.sleep(3000);
+//        server.sendData("hello world!");
         //
-        list.forEach(client -> {
-            client.sendData("hello world server");
-        });
+        for (int i = 0; i < 10 ; i++) {
+          list.get(0).sendData("client to server :hello world server +==>" + i);
+        }
+//        list.forEach(client -> {
+//            client.sendData("hello world server");
+//        });
     }
 
     public static void createServer(int port) throws IOException {

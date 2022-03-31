@@ -24,6 +24,9 @@ public class Server {
     private Logger logger = LoggerFactory.getLogger(Server.class);
     private Map<String, SocketChannel> map = new HashMap<>();
     private AtomicInteger atomicInteger = new AtomicInteger(0);
+    private ByteBuffer headByteBuffer;
+    private Integer length;
+    private ByteBuffer bodyByteBuffer;
 
     public void init(int port) throws IOException {
         //
@@ -64,17 +67,39 @@ public class Server {
 
     }
 
-    private void request(SelectionKey next) throws IOException {
-        SocketChannel socketChannel = (SocketChannel) next.channel();
-        ByteBuffer sizeBuf = ByteBuffer.allocate(4);
-        int count = socketChannel.read(sizeBuf);
-        sizeBuf.flip();
-        int length = sizeBuf.getInt();
-        ByteBuffer contentBuf = ByteBuffer.allocate(length);
-        socketChannel.read(contentBuf);
-        String content = new String(contentBuf.array(), StandardCharsets.UTF_8);
-        logger.info("server {} receive message {}", socketChannel, content);
 
+    private void request(SelectionKey next) throws IOException {
+        // TODO 利用bytebuffer 直接读任意长度，然后通过复位操作
+        // 怪不得netty需要byteBuf,因为ByteBuf 可以复位操作
+        // 测试粘包问题。减慢发送速率
+        SocketChannel socketChannel = (SocketChannel) next.channel();
+        if(length == null) {
+            if (headByteBuffer == null) {
+                this.headByteBuffer = ByteBuffer.allocate(4);
+            }
+            logger.info("add head byte");
+            socketChannel.read(headByteBuffer);
+            if (headByteBuffer.position() < 4) {
+                return;
+            }
+            headByteBuffer.flip();
+            this.length =  headByteBuffer.getInt();
+        }
+
+        if(bodyByteBuffer == null){
+            this.bodyByteBuffer = ByteBuffer.allocate(length);
+        }
+        logger.info("add body byte");
+        socketChannel.read(bodyByteBuffer);
+        if(bodyByteBuffer.position() == length){
+            bodyByteBuffer.flip();
+            String content = new String(bodyByteBuffer.array(), StandardCharsets.UTF_8);
+            logger.info("server {} receive message {}", socketChannel, content);
+            // 复位
+            headByteBuffer = null;
+            length = null;
+            bodyByteBuffer = null;
+        }
     }
 
     private void active(SelectionKey next) {

@@ -3,6 +3,7 @@ package com.weifuchow.network.multiclient.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -39,6 +40,7 @@ public class NettyServer {
             b.group(bossGroup, workerGroup2);
             b.channel(NioServerSocketChannel.class);
             b.option(ChannelOption.SO_BACKLOG, 100);
+            b.option(ChannelOption.ALLOCATOR,PooledByteBufAllocator.DEFAULT);
             b.handler(new LoggingHandler(LogLevel.DEBUG));
             b.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override

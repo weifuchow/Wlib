@@ -32,18 +32,18 @@ public class Test {
         //
         createServer(port);
         //
-        for (int i = 0; i < 5000; i++) {
+        for (int i = 0; i < 2000; i++) {
             createClient(host, port, eventLoopGroup);
         }
         //
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         server.sendData("hello world!");
 //        //
-//        Thread.sleep(1000);
-//        //
-//        list.forEach(client -> {
-//            client.sendData("hello world server " + UUID.randomUUID().toString());
-//        });
+        Thread.sleep(1000);
+        //
+        list.forEach(client -> {
+            client.sendData("hello world server " + UUID.randomUUID().toString());
+        });
     }
 
     public static void createServer(int port) throws IOException {

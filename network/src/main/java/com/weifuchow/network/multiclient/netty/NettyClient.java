@@ -6,15 +6,8 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.util.UUID;
 
 public class NettyClient {
 
@@ -44,7 +37,7 @@ public class NettyClient {
         Bootstrap bootstrap = new Bootstrap();
 
 
-        bootstrap.group(workGroup);
+        bootstrap.group(new NioEventLoopGroup());
 
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
@@ -63,7 +56,6 @@ public class NettyClient {
         });
 
         ChannelFuture channelFuture = bootstrap.connect(host, port);
-
         channelFuture.addListener((ChannelFuture future) -> {
             if (future.isSuccess()) {
                 logger.info("client {} connected", future.channel());
