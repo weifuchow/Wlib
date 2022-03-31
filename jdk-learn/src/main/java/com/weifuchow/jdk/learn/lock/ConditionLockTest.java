@@ -1,8 +1,6 @@
 package com.weifuchow.jdk.learn.lock;
 
 
-import sun.misc.ConditionLock;
-
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;

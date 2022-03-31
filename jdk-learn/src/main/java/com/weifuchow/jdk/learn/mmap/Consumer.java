@@ -6,7 +6,8 @@ import java.nio.channels.FileChannel;
 
 /**
  * Copyright © weifuchow., Ltd. . .
- *
+ * 主要也都是利用Pache 进行预读，OS 内部申请相邻的磁道，
+ * 数据的读取，如果一次读取文件时出现未命中PageCache的情况，OS从物理磁盘上访问读取文件的同时，会顺序对其他相邻块的数据文件进行预读取。
  * @author: weifuchow
  * @date: 2021/2/5 16:07
  */

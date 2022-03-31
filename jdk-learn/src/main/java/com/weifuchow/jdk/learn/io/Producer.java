@@ -1,10 +1,7 @@
 package com.weifuchow.jdk.learn.io;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
-
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 
 /**
  * Copyright © weifuchow., Ltd. . .

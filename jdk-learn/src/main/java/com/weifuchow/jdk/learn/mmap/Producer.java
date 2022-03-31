@@ -6,7 +6,8 @@ import java.nio.channels.FileChannel;
 
 /**
  * Copyright © weifuchow., Ltd. . .
- *
+ * 主要利用pageCache 技术，异步刷盘。提高吞吐量，无需手动flush,程序崩溃消息也都在。
+ * 数据的写入，OS会先写入至Cache内，随后通过异步的方式由pdflush内核线程将Cache内的数据刷盘至物理磁盘上
  * @author: weifuchow
  * @date: 2021/2/5 16:07
  */

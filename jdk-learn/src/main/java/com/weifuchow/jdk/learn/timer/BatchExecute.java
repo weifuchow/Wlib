@@ -1,11 +1,9 @@
 package com.weifuchow.jdk.learn.timer;
 
-import com.sun.jmx.remote.internal.ArrayQueue;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
