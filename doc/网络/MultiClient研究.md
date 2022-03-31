@@ -161,5 +161,53 @@ public class Test {
 }
 ```
 
+## 总结
 
+- 在使用Netty作为客户端管理工具时，可利用全局NioEventGroup进行多客户端eventgroup管理。经过测试可得。NioEventGroup 配置多个线程时，会对立面的每个channel进行负载均衡，即每个线程处理平均处理不同Channel的eventLoop。
+
+  - 日志
+
+    - 连接时
+
+    ```html
+    2021-11-05 14:46:44 INFO  client-worker-group-1-14 NettyClient:69 - client [id: 0xad7893f7, L:/127.0.0.1:3150 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-16 NettyClient:69 - client [id: 0x43b7edae, L:/127.0.0.1:3151 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-7 NettyClient:69 - client [id: 0x48c1b144, L:/127.0.0.1:3143 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-15 NettyClient:69 - client [id: 0xaa3c4ff7, L:/127.0.0.1:3152 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-4 NettyClient:69 - client [id: 0x5d2c134b, L:/127.0.0.1:3146 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-9 NettyClient:69 - client [id: 0x56fbde02, L:/127.0.0.1:3153 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-3 NettyClient:69 - client [id: 0xbcdc6e13, L:/127.0.0.1:3144 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-10 NettyClient:69 - client [id: 0x8e430a51, L:/127.0.0.1:3148 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-11 NettyClient:69 - client [id: 0x7e6abb75, L:/127.0.0.1:3154 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-2 NettyClient:69 - client [id: 0x41b29c05, L:/127.0.0.1:3141 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-6 NettyClient:69 - client [id: 0xd8b188d5, L:/127.0.0.1:3155 - R:localhost/127.0.0.1:9090] connected
+    2021-11-05 14:46:44 INFO  client-worker-group-1-4 NettyClient:69 - client [id: 0x2d0fdd8c, L:/127.0.0.1:3159 - R:localhost/127.0.0.1:9090] connected
+    ```
+
+    - 读取时
+
+    ```html
+    2021-11-05 14:46:49 INFO  client-worker-group-1-11 NettyClient:90 - client channel [id: 0x7e6abb75, L:/127.0.0.1:3154 - R:localhost/127.0.0.1:9090] receive msg hello world!->15
+    2021-11-05 14:46:49 INFO  server-worker-group-4-15 NettyServer:95 - server receive msg hey server i am client = >name-5 from [id: 0xe43f12e1, L:/127.0.0.1:9090 - R:/127.0.0.1:3149]
+    2021-11-05 14:46:49 INFO  client-worker-group-1-6 NettyClient:92 - client send msg to server : hey server i am client = >name-6
+    2021-11-05 14:46:49 INFO  client-worker-group-1-13 NettyClient:92 - client send msg to server : hey server i am client = >name-13
+    2021-11-05 14:46:49 INFO  client-worker-group-1-1 NettyClient:92 - client send msg to server : hey server i am client = >name-17
+    2021-11-05 14:46:49 INFO  client-worker-group-1-11 NettyClient:92 - client send msg to server : hey server i am client = >name-11
+    2021-11-05 14:46:49 INFO  client-worker-group-1-12 NettyClient:90 - client channel [id: 0xbdd201d0, L:/127.0.0.1:3147 - R:localhost/127.0.0.1:9090] receive msg hello world!->4
+    2021-11-05 14:46:49 INFO  client-worker-group-1-8 NettyClient:90 - client channel [id: 0xd1d813af, L:/127.0.0.1:3156 - R:localhost/127.0.0.1:9090] receive msg hello world!->8
+    2021-11-05 14:46:49 INFO  client-worker-group-1-14 NettyClient:90 - client channel [id: 0xad7893f7, L:/127.0.0.1:3150 - R:localhost/127.0.0.1:9090] receive msg hello world!->2
+    2021-11-05 14:46:49 INFO  server-worker-group-4-1 NettyServer:95 - server receive msg hey server i am client = >name-11 from [id: 0xd01b4627, L:/127.0.0.1:9090 - R:/127.0.0.1:3154]
+    2021-11-05 14:46:49 INFO  client-worker-group-1-16 NettyClient:90 - client channel [id: 0x43b7edae, L:/127.0.0.1:3151 - R:localhost/127.0.0.1:9090] receive msg hello world!->5
+    2021-11-05 14:46:49 INFO  server-worker-group-4-2 NettyServer:95 - server receive msg hey server i am client = >name-18 from [id: 0xbd66dbcc, L:/127.0.0.1:9090 - R:/127.0.0.1:3158]
+    2021-11-05 14:46:49 INFO  client-worker-group-1-3 NettyClient:90 - client channel [id: 0xf261e412, L:/127.0.0.1:3157 - R:localhost/127.0.0.1:9090] receive msg hello world!->11
+    2021-11-05 14:46:49 INFO  client-worker-group-1-9 NettyClient:90 - client channel [id: 0x56fbde02, L:/127.0.0.1:3153 - R:localhost/127.0.0.1:9090] receive msg hello world!->7
+    2021-11-05 14:46:49 INFO  client-worker-group-1-14 NettyClient:92 - client send msg to server : hey server i am client = >name-14
+    2021-11-05 14:46:49 INFO  client-worker-group-1-16 NettyClient:92 - client send msg to server : hey server i am client = >name-16
+    2021-11-05 14:46:49 INFO  server-worker-group-4-10 NettyServer:95 - server receive msg hey server i am client = >name-14 from [id: 0x6b66b571, L:/127.0.0.1:9090 - R:/127.0.0.1:3150]
+    2021-11-05 14:46:49 INFO  client-worker-group-1-9 NettyClient:92 - client send msg to server : hey server i am client = >name-9
+    2021-11-05 14:46:49 INFO  client-worker-group-1-4 NettyClient:92 - client send msg to server : hey server i am client = >name-4
+    2021-11-05 14:46:49 INFO  client-worker-group-1-3 NettyClient:92 - client send msg to server : hey server i am client = >name-19
+    ```
+
+  - **线程 client-worker-group-1-9 始终处理着L127.0.0.1:3153 - R:localhost/127.0.0.1:9090 的channel.说明每个线程将会平均处理channel的eventloop.**
 
